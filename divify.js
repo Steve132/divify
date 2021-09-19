@@ -42,7 +42,7 @@ function _tokenize(htmlIn)
             var all=htmlIn.slice(ci+1);
             var dex=all.indexOf('"');
             if(dex < 0) { throw new Error('No closing " found'); }
-            curtoken='"'+all.slice(0,dex);
+            curtoken=all.slice(0,dex);
             ci+=curtoken.length+1;
             pushfunc();
         }
@@ -61,7 +61,7 @@ function _parse(tokens,index,level)
 {
 	var outhtml="";
   var ci=index;
-  var curnode={"id":null,"attr":{},"classes":[]};
+  var curnode={"tag":"div","id":null,"attr":{},"classes":[]};
   
   while(ci < tokens.length)
   {
@@ -73,6 +73,10 @@ function _parse(tokens,index,level)
       curnode.id=tokens[ci].slice(1);
       ci++;
     }
+	else if(tokens[ci].startsWith('^')){
+	  curnode.tag=tokens[ci].slice(1);
+	  ci++;
+	}
     else if(tokens[ci+1]=='='){
       k=tokens[ci]
       v=tokens[ci+2]
@@ -82,7 +86,10 @@ function _parse(tokens,index,level)
     else if(tokens[ci]=='{')
     {
       
-      outhtml+='\t'.repeat(level)+'<div class="'+curnode.classes.join(' ')+'" ';
+      outhtml+='\t'.repeat(level)+'<'+curnode.tag;
+	  if(curnode.classes.length > 0) {
+		  outhtml+=' class="'+curnode.classes.join(' ')+'" ';
+	  }
       for (const [key, value] of Object.entries(curnode.attr)) {
         outhtml+=` ${key}="${value}"`;
       }
@@ -94,8 +101,8 @@ function _parse(tokens,index,level)
       internalresult=_parse(tokens,ci+1,level+1);
       outhtml+=internalresult[0];
       ci=internalresult[1];
-      curnode={"id":null,"attr":{},"classes":[]}; //reset
-      outhtml+='\t'.repeat(level)+'</div>\n';
+      outhtml+='\t'.repeat(level)+'</'+curnode.tag+'>\n';
+	  curnode={"tag":"div","id":null,"attr":{},"classes":[]}; //reset
     }
     else if(tokens[ci]=='}')
     {
