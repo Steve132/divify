@@ -23,6 +23,17 @@ function _tokenize(htmlIn)
             ci+=curtoken.length+2;
             pushfunc();
         }
+		else if(ch=='[')
+		{
+			pushfunc();
+			var all=htmlIn.slice(ci+1);
+			var dex=all.indexOf(']');
+			if(dex < 0) { throw new Error('No closing ] found'); }
+			var z=all.slice(0,dex);
+			curtoken='['+z;
+			ci+=curtoken.length+1;
+			pushfunc();
+		}
         else if(ch=='/' && htmlIn[ci+1]=='/')
         {
             pushfunc();
@@ -61,7 +72,7 @@ function _parse(tokens,index,level)
 {
 	var outhtml="";
   var ci=index;
-  var curnode={"tag":"div","id":null,"attr":{},"classes":[]};
+  var curnode={"tag":"div","id":null,"attr":{},"classes":[],"style":null};
   
   while(ci < tokens.length)
   {
@@ -77,6 +88,10 @@ function _parse(tokens,index,level)
 	  curnode.tag=tokens[ci].slice(1);
 	  ci++;
 	}
+	else if(tokens[ci].startsWith('[')){
+		curnode.style=tokens[ci].slice(1);
+		ci++;
+	}
     else if(tokens[ci+1]=='='){
       k=tokens[ci]
       v=tokens[ci+2]
@@ -90,6 +105,9 @@ function _parse(tokens,index,level)
 	  if(curnode.classes.length > 0) {
 		  outhtml+=' class="'+curnode.classes.join(' ')+'" ';
 	  }
+	  if(curnode.style) {
+		  outhtml+=' style="'+curnode.style+'" ';
+	  }
       for (const [key, value] of Object.entries(curnode.attr)) {
         outhtml+=` ${key}="${value}"`;
       }
@@ -102,7 +120,7 @@ function _parse(tokens,index,level)
       outhtml+=internalresult[0];
       ci=internalresult[1];
       outhtml+='\t'.repeat(level)+'</'+curnode.tag+'>\n';
-	  curnode={"tag":"div","id":null,"attr":{},"classes":[]}; //reset
+	  curnode={"tag":"div","id":null,"attr":{},"classes":[],"style":null}; //reset
     }
     else if(tokens[ci]=='}')
     {
