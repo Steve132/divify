@@ -15,18 +15,19 @@ function _tokenize(htmlIn)
         else if(ch=='$' && htmlIn[ci+1]=='$')
         {
             pushfunc();
-            all=htmlIn.slice(ci+2);
-            dex=all.indexOf('$$');
+            var all=htmlIn.slice(ci+2);
+            var dex=all.indexOf('$$');
             if(dex < 0) { throw new Error('No closing $$ found'); }
-            curtoken='$$'+all.slice(dex);
+			var z=all.slice(0,dex);
+            curtoken='$$'+z;
             ci+=curtoken.length+2;
             pushfunc();
         }
         else if(ch=='/' && htmlIn[ci+1]=='/')
         {
             pushfunc();
-            all=htmlIn.slice(ci+2);
-            dex=all.indexOf('\n');
+            var all=htmlIn.slice(ci+2);
+            var dex=all.indexOf('\n');
             ci+=dex+2;
         }
         else if(ch=='{' || ch=='}' || ch=="=")
@@ -38,10 +39,10 @@ function _tokenize(htmlIn)
         else if(ch=='"')
         {
             pushfunc();
-            all=htmlIn.slice(ci+1);
-            dex=all.indexOf('"');
+            var all=htmlIn.slice(ci+1);
+            var dex=all.indexOf('"');
             if(dex < 0) { throw new Error('No closing " found'); }
-            curtoken='"'+all.slice(dex);
+            curtoken='"'+all.slice(0,dex);
             ci+=curtoken.length+1;
             pushfunc();
         }
@@ -112,7 +113,7 @@ function _parse(tokens,index,level)
 function divify(oldHtml)
 {
     var tk=_tokenize(oldHtml);
-    //console.log(tk);
+    console.log(tk);
     var rs=_parse(tk,0,0);
     //console.log(rs[0]);
     return rs[0];
