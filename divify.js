@@ -113,7 +113,7 @@ function _parse(tokens,index,level)
 function divify(oldHtml)
 {
     var tk=_tokenize(oldHtml);
-    console.log(tk);
+    //console.log(tk);
     var rs=_parse(tk,0,0);
     //console.log(rs[0]);
     return rs[0];
