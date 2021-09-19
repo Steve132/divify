@@ -26,3 +26,17 @@ Simple plugin to build nested with a shorthand syntax
     }
 
     </div>
+
+
+	function resource(namelower,namefancy)
+	{
+		return divify(`
+			item {
+				ui avatar image ^img src="./img/${namelower}.png"
+				content {
+					header { $$ ${namefancy} $$ } 
+					#${namelower}_content {}
+				}
+			}
+		`);
+	}
