@@ -1,8 +1,6 @@
 # divify
 
-Divify is a simple library to create a nicer syntax to build trees of elements in HTML5
-
-This is useful in all kinds of elements like material, semantic, skeleton, bootstrap, etc.
+Divify is a simple library to create a nicer syntax to build trees of elements in HTML
 
 For example, go from
 
@@ -28,6 +26,7 @@ For example, go from
 	</div>
 	
 To 
+
 	<div class="divified">
 		ui card {   
 			image { ^img src="/images/avatar2/large/kristy.png" {} }
@@ -47,6 +46,7 @@ To
 
 This is just syntactic sugar, but the syntactic sugar is MUCH more readable with a much higher signal to noise ratio.
 
+## Syntax 
 The overall syntax is `<token1> <token2> ... <token3> {}` for each element, where token can be 
 1) an alphanumeric identifier: then this token is added to the class list for the element
 2) `^tag`: then the html tag of this element is overridden to `tag`.  Default is `div`
@@ -76,13 +76,16 @@ Here's a breakdown of the above example:
 			}
 		}
     </div>
-	
+
+## Usage and API
 It has two APIs:  The first, which is automatic, processes everything inside `divified` elements.
 The second API is simply the `divify(x)` function, which can be used like `var html_str=divify(divifysource_str);`
 
+## Frameworks
 You can also use it with string interpolation and javascript multiline template strings to implement
-a really simple sort of UI component system or templates.
+a really simple sort of UI component system or templates. (very rudimentary)
 
+    //an example 'resource' component
 	function resource(namelower,namefancy)
 	{
 		return divify(`
@@ -95,4 +98,7 @@ a really simple sort of UI component system or templates.
 			}
 		`);
 	}
-	
+
+## License
+
+It uses the unlicense! Do what you want with it!
