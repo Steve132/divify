@@ -45,6 +45,7 @@ To
 	</div>
 
 This is just syntactic sugar, but the syntactic sugar is MUCH more readable with a much higher signal to noise ratio.
+This is really useful for quickly prototyping designs (which can be copied as HTML in production) OR used directly in production!
 
 ## Syntax 
 The overall syntax is `<token1> <token2> ... <token3> {}` for each element, where token can be 
