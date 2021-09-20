@@ -170,10 +170,7 @@ function undivify(allnodes,recurrance_increment='\t',recurrance_str='\n')
 				outstr+='{';
 				if(e.hasChildNodes()){
 					var children=e.childNodes;
-					var nrs=recurrance_str+recurrance_increment;
-					for(var i=0;i<children.length;i++){
-						outstr+=undivify(children[i],nrs,,recurrance_str);
-					}
+					outstr+=undivify(children,recurrance_str+recurrance_increment,recurrance_increment);
 				}
 				outstr+=recurrance_str+'}';
 				break;
