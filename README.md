@@ -81,6 +81,8 @@ Here's a breakdown of the above example:
 It has two APIs:  The first, which is automatic, processes everything inside `divified` elements.
 The second API is simply the `divify(x)` function, which can be used like `var html_str=divify(divifysource_str);`
 
+There's also an `undivlify(e)` call which can be used in the console to convert from an existing Element instance to divify syntax in order to simplify migrations.
+
 ## Frameworks
 You can also use it with string interpolation and javascript multiline template strings to implement
 a really simple sort of UI component system or templates. (very rudimentary)

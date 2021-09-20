@@ -66,8 +66,6 @@ function _tokenize(htmlIn)
     return tokens;
 }
 
-//TODO error handling with parens
-//TODO something is broken
 function _parse(tokens,index,level)
 {
 	var outhtml="";
@@ -138,16 +136,57 @@ function _parse(tokens,index,level)
 function divify(oldHtml)
 {
     var tk=_tokenize(oldHtml);
-    //console.log(tk);
     var rs=_parse(tk,0,0);
-    //console.log(rs[0]);
     return rs[0];
 }
+
+function undivify(allnodes,recurrance_increment='\t',recurrance_str='\n')
+{
+	var outstr="";
+	for (e in allnodes) {
+		switch(e.nodeType){
+			case Node.TEXT_NODE:
+				outstr+=recurrance_str+"$$"+e.nodeValue+"$$";
+				break;
+			case Node.COMMENT_NODE:
+				outstr+=recurrance_str+"//"+e.nodeValue+"\n";
+				break;
+			case Node.ELEMENT_NODE:
+				outstr+=recurrance_str+e.classList.value;
+				if(e.hasAttributes()){
+					var attrs=e.attributes;
+					for(var i=0;i<attrs.length;i++){
+						if(attrs[i].name=="style"){
+							outstr+='['+attrs[i].value+'] ';
+						}
+						else {
+							outstr+=attrs[i].name+'="'+attrs[i].value+'" ';
+						}
+					}
+				}
+				if(e.nodeName.toLowerCase() != 'div') {
+					outstr+='^'+e.nodeName.toLowerCase()+' ';
+				}
+				outstr+='{';
+				if(e.hasChildNodes()){
+					var children=e.childNodes;
+					var nrs=recurrance_str+recurrance_increment;
+					for(var i=0;i<children.length;i++){
+						outstr+=undivify(children[i],nrs,,recurrance_str);
+					}
+				}
+				outstr+=recurrance_str+'}';
+				break;
+		};
+	}
+}
+
 
 function _divifyAll()
 {
 	var elements = document.querySelectorAll('.divified');
     elements.forEach( (element) => { element.innerHTML=divify(element.innerHTML); } );
+	
 }
 document.addEventListener('DOMContentLoaded', (event) => {
     _divifyAll();
