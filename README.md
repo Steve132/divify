@@ -11,7 +11,7 @@ For example, go from
 		<img src="/images/avatar2/large/kristy.png">
 	  </div>
 	  <div class="content">
-		<a class="header">Kristy</a>
+		<a class="header" id="name">Kristy</a>
 		<div class="meta">
 		  <span class="date">Joined in 2013</span>
 		</div>
@@ -19,7 +19,7 @@ For example, go from
 		  Kristy is an art director living in New York.
 		</div>
 	  </div>
-	  <div class="extra content">
+	  <div class="extra content" style="color: blue;">
 		<a>
 		  <i class="user icon"></i>
 		  22 Friends
@@ -29,10 +29,10 @@ For example, go from
 	
 To 
 	<div class="divified">
-		ui card { 
+		ui card {   
 			image { ^img src="/images/avatar2/large/kristy.png" {} }
 			content {
-				header ^a { $$Kristy$$ }
+				header #name ^a { $$Kristy$$ }
 				meta { date ^span { $$Joined in 2013$$ } }
 				description { $$Kristy is an art director living in New York$$ }
 			}
@@ -45,36 +45,43 @@ To
 		}
 	</div>
 
-This is just syntactic sugar, but the syntactic sugar is MUCH more readable.
+This is just syntactic sugar, but the syntactic sugar is MUCH more readable with a much higher signal to noise ratio.
 
-It also is compatible with frameworks 
+The overall syntax is `<token1> <token2> ... <token3> {}` for each element, where token can be 
+1) an alphanumeric identifier: then this token is added to the class list for the element
+2) `^tag`: then the html tag of this element is overridden to `tag`.  Default is `div`
+3) `#id` : then the html id of this element is overriden to `id`.
+3) `identifier=value` this is then added as an attribute to the element
+4) `[<css>]` then the css inside `[]` is added as an inline style attribute.
 
-    <div class="divified">
+These two constructs can be nested.  Also, Anything inside `$$...$$` is emitted directly as HTML at that point in the tree.
 
-    ui container #bob width=200 {       //makes a div with id "bob", classes "ui container", and an attribute width="200"
-        ui internally celled grid {
-       
-            row {
-                three wide column {
-                    ui placeholder #icon { 
-                        square image { } 
-                        $$ Hello you dickback 
+Here's a breakdown of the above example:
 
-                        $$
-                    }
-                    ui placeholder { //This is a comment
-                        paragraph { line { } line { } line{ } } 
-                    }
-                    ui placeholder { 
-                        square image { } 
-                    }
-                }
-            }
-        }
-    }
-
+    <div class="divified">  
+		//Divify supports C-style comments
+		ui card {   //makes <div class="ui card"></div>
+		
+			image { ^img src="/images/avatar2/large/kristy.png" {} } //make an img element
+			content {
+				header #name ^a { $$Kristy$$ } //id=name
+				meta { date ^span { $$Joined in 2013$$ } }
+				description { $$Kristy is an art director living in New York$$ }
+			}
+			extra content [color: blue] { //add an inline style
+				^a {
+					user icon ^i {}
+					$$22 Friends$$
+				}
+			}
+		}
     </div>
+	
+It has two APIs:  The first, which is automatic, processes everything inside `divified` elements.
+The second API is simply the `divify(x)` function, which can be used like `var html_str=divify(divifysource_str);`
 
+You can also use it with string interpolation and javascript multiline template strings to implement
+a really simple sort of UI component system or templates.
 
 	function resource(namelower,namefancy)
 	{
@@ -88,3 +95,4 @@ It also is compatible with frameworks
 			}
 		`);
 	}
+	

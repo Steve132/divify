@@ -144,9 +144,11 @@ function divify(oldHtml)
     return rs[0];
 }
 
-function divifyAll()
+function _divifyAll()
 {
-    $(".divified").html(function(index,oldHtml){return divify(oldHtml);});
+	var elements = document.querySelectorAll('.divified');
+    elements.forEach( (element) => { element.innerHTML=divify(element.innerHTML); } );
 }
-
-$(divifyAll); //Load on ready
+document.addEventListener('DOMContentLoaded', (event) => {
+    _divifyAll();
+});
