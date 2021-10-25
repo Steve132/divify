@@ -2,34 +2,38 @@
 function _tokenize(htmlIn) {
 	var tokens = [];
 	var curtoken = "";
-	var pushfunc = function() {
-		if(curtoken.length > 0) {
+	var pushfunc = function () {
+		if (curtoken.length > 0) {
 			tokens.push(curtoken);
 			curtoken = ""
 		}
 	};
-	for(var ci = 0; ci < htmlIn.length; ci++) {
+	for (var ci = 0; ci < htmlIn.length; ci++) {
 		var ch = htmlIn[ci];
-		if(/\s/.test(ch)) {
+		if (/[\s]/.test(ch)) {
+			pushfunc();
+			continue;
+		}
+		if (/[\.#]/.test(ch)) {
 			pushfunc();
 		}
-		else if(ch == '$' && htmlIn[ci + 1] == '$') {
+		if (ch == '"') {
 			pushfunc();
-			var all = htmlIn.slice(ci + 2);
-			var dex = all.indexOf('$$');
-			if(dex < 0) {
-				throw new Error('No closing $$ found');
+			var all = htmlIn.slice(ci + 1);
+			var dex = all.search('[^\\\\]"');
+			if (dex < 0) {
+				throw new Error('No closing \'"\' found');
 			}
-			var z = all.slice(0, dex);
-			curtoken = '$$' + z;
-			ci += curtoken.length + 2;
+			var z = all.slice(0, dex + 1);
+			curtoken = '"' + z;
+			ci += curtoken.length + 1;
 			pushfunc();
 		}
-		else if(ch == '[') {
+		else if (ch == '[') {
 			pushfunc();
 			var all = htmlIn.slice(ci + 1);
 			var dex = all.indexOf(']');
-			if(dex < 0) {
+			if (dex < 0) {
 				throw new Error('No closing ] found');
 			}
 			var z = all.slice(0, dex);
@@ -37,30 +41,19 @@ function _tokenize(htmlIn) {
 			ci += curtoken.length + 1;
 			pushfunc();
 		}
-		else if(ch == '/' && htmlIn[ci + 1] == '/') {
+		else if (ch == '/' && htmlIn[ci + 1] == '/') {
 			pushfunc();
 			var all = htmlIn.slice(ci + 2);
 			var dex = all.indexOf('\n');
 			ci += dex + 2;
 		}
-		else if(ch == '{' || ch == '}' || ch == "=") {
+		else if (ch == '{' || ch == '}' || ch == "=") {
 			pushfunc();
 			curtoken = ch;
 			pushfunc();
 		}
-		else if(ch == '"') {
-			pushfunc();
-			var all = htmlIn.slice(ci + 1);
-			var dex = all.indexOf('"');
-			if(dex < 0) {
-				throw new Error('No closing " found');
-			}
-			curtoken = all.slice(0, dex);
-			ci += curtoken.length + 1;
-			pushfunc();
-		}
 		else {
-			curtoken += htmlIn[ci];
+			curtoken += ch;
 		}
 	}
 	pushfunc();
@@ -78,42 +71,46 @@ function _parse(tokens, index, level) {
 		"style": null
 	};
 
-	while(ci < tokens.length) {
-		if(tokens[ci].startsWith('$$')) {
-			outhtml += tokens[ci].slice(2);
+	while (ci < tokens.length) {
+		if (tokens[ci].startsWith('"')) {
+			outhtml += tokens[ci].slice(1);
 			ci++;
 		}
-		else if(tokens[ci].startsWith('#')) {
+		else if (tokens[ci].startsWith('#')) {
 			curnode.id = tokens[ci].slice(1);
 			ci++;
 		}
-		else if(tokens[ci].startsWith('^')) {
-			curnode.tag = tokens[ci].slice(1);
-			ci++;
-		}
-		else if(tokens[ci].startsWith('[')) {
+		else if (tokens[ci].startsWith('[')) {
 			curnode.style = tokens[ci].slice(1);
 			ci++;
 		}
-		else if(tokens[ci + 1] == '=') {
+		else if (tokens[ci].startsWith('.')) {
+			curnode.classes.push(tokens[ci].slice(1));
+			ci += 1;
+		}
+		else if (tokens[ci + 1] == '=') {
 			k = tokens[ci]
 			v = tokens[ci + 2]
 			ci += 3;
 			curnode.attr[k] = v;
 		}
-		else if(tokens[ci] == '{') {
+		else if (/[\w\d]+/.test(tokens[ci])) {
+			curnode.tag = tokens[ci];
+			ci++;
+		}
+		else if (tokens[ci] == '{') {
 
 			outhtml += '\t'.repeat(level) + '<' + curnode.tag;
-			if(curnode.classes.length > 0) {
+			if (curnode.classes.length > 0) {
 				outhtml += ' class="' + curnode.classes.join(' ') + '" ';
 			}
-			if(curnode.style) {
+			if (curnode.style) {
 				outhtml += ' style="' + curnode.style + '" ';
 			}
-			for(const [key, value] of Object.entries(curnode.attr)) {
+			for (const [key, value] of Object.entries(curnode.attr)) {
 				outhtml += ` ${key}="${value}"`;
 			}
-			if(curnode.id != null) {
+			if (curnode.id != null) {
 				outhtml += ` id="${curnode.id}"`;
 			}
 
@@ -130,13 +127,12 @@ function _parse(tokens, index, level) {
 				"style": null
 			}; //reset
 		}
-		else if(tokens[ci] == '}') {
+		else if (tokens[ci] == '}') {
 			ci += 1;
 			break;
 		}
 		else {
-			curnode.classes.push(tokens[ci]);
-			ci += 1;
+			throw new Error("Unrecognized token" + tokens[ci]);
 		}
 	}
 	return [outhtml, ci];
@@ -148,22 +144,23 @@ function divify(oldHtml) {
 	return rs[0];
 }
 
+
 function undivify(allnodes, recurrance_increment = '\t', recurrance_str = '\n') {
 	var outstr = "";
-	for(e in allnodes) {
-		switch(e.nodeType) {
+	for (e in allnodes) {
+		switch (e.nodeType) {
 			case Node.TEXT_NODE:
-				outstr += recurrance_str + "$$" + e.nodeValue + "$$";
+				outstr += recurrance_str + '"' + e.nodeValue + '"';
 				break;
 			case Node.COMMENT_NODE:
 				outstr += recurrance_str + "//" + e.nodeValue + "\n";
 				break;
 			case Node.ELEMENT_NODE:
 				outstr += recurrance_str + e.classList.value;
-				if(e.hasAttributes()) {
+				if (e.hasAttributes()) {
 					var attrs = e.attributes;
-					for(var i = 0; i < attrs.length; i++) {
-						if(attrs[i].name == "style") {
+					for (var i = 0; i < attrs.length; i++) {
+						if (attrs[i].name == "style") {
 							outstr += '[' + attrs[i].value + '] ';
 						}
 						else {
@@ -171,11 +168,11 @@ function undivify(allnodes, recurrance_increment = '\t', recurrance_str = '\n') 
 						}
 					}
 				}
-				if(e.nodeName.toLowerCase() != 'div') {
+				if (e.nodeName.toLowerCase() != 'div') {
 					outstr += '^' + e.nodeName.toLowerCase() + ' ';
 				}
 				outstr += '{';
-				if(e.hasChildNodes()) {
+				if (e.hasChildNodes()) {
 					var children = e.childNodes;
 					outstr += undivify(children, recurrance_str + recurrance_increment, recurrance_increment);
 				}
