@@ -147,16 +147,19 @@ function divify(oldHtml) {
 
 function undivify(allnodes, recurrance_increment = '\t', recurrance_str = '\n') {
 	var outstr = "";
+	var escape_quotes = function (st) {
+		return st.replace('"', '\\"');
+	};
 	for (e in allnodes) {
 		switch (e.nodeType) {
 			case Node.TEXT_NODE:
-				outstr += recurrance_str + '"' + e.nodeValue + '"';
+				outstr += recurrance_str + '"' + escape_quotes(e.nodeValue) + '"';
 				break;
 			case Node.COMMENT_NODE:
-				outstr += recurrance_str + "//" + e.nodeValue + "\n";
+				outstr += recurrance_str + "//" + escape_quotes(e.nodeValue) + "\n";
 				break;
 			case Node.ELEMENT_NODE:
-				outstr += recurrance_str + e.classList.value;
+				outstr += recurrance_str + e.classList.value.split(/[\s]+/).map(c => '.' + c).join(" ");
 				if (e.hasAttributes()) {
 					var attrs = e.attributes;
 					for (var i = 0; i < attrs.length; i++) {
@@ -169,7 +172,7 @@ function undivify(allnodes, recurrance_increment = '\t', recurrance_str = '\n') 
 					}
 				}
 				if (e.nodeName.toLowerCase() != 'div') {
-					outstr += '^' + e.nodeName.toLowerCase() + ' ';
+					outstr += e.nodeName.toLowerCase() + ' ';
 				}
 				outstr += '{';
 				if (e.hasChildNodes()) {

@@ -28,17 +28,17 @@ For example, go from
 To 
 
 	<div class="divified">
-		ui card {   
-			image { ^img src="/images/avatar2/large/kristy.png" {} }
-			content {
-				header #name ^a { $$Kristy$$ }
-				meta { date ^span { $$Joined in 2013$$ } }
-				description { $$Kristy is an art director living in New York$$ }
+		.ui .card {   
+			.image { img src="/images/avatar2/large/kristy.png" {} }
+			.content {
+				.header #name a { "Kristy" }
+				.meta { .date span { "Joined in 2013" } }
+				.description { "Kristy is an art director living in New York" }
 			}
-			extra content {
-				^a {
-					user icon ^i {}
-					$$22 Friends$$
+			.extra .content {
+				a {
+					.user .icon i {}
+					"22 Friends"
 				}
 			}
 		}
@@ -49,30 +49,31 @@ This is really useful for quickly prototyping designs (which can be copied as HT
 
 ## Syntax 
 The overall syntax is `<token1> <token2> ... <token3> {}` for each element, where token can be 
-1) an alphanumeric identifier: then this token is added to the class list for the element
-2) `^tag`: then the html tag of this element is overridden to `tag`.  Default is `div`
-3) `#id` : then the html id of this element is overriden to `id`.
+1) a css selector: 
+	* `.class`. ..e.g. then this token is added to the class list for the element
+	* `tag`: then the html tag of this element is overridden to `tag`.  Default is `div`
+	* `#id` : then the html id of this element is overriden to `id`.
 3) `identifier=value` this is then added as an attribute to the element
 4) `[<css>]` then the css inside `[]` is added as an inline style attribute.
 
-These two constructs can be nested.  Also, Anything inside `$$...$$` is emitted directly as HTML at that point in the tree.
+These two constructs can be nested.  Also, Anything inside `"..."` is emitted directly as HTML at that point in the tree.  (If you need to emit "", then you can use backslash to escape it)
 
 Here's a breakdown of the above example:
 
     <div class="divified">  
 		//Divify supports C-style comments
-		ui card {   //makes <div class="ui card"></div>
+		.ui .card {   //makes <div class="ui card"></div>
 		
-			image { ^img src="/images/avatar2/large/kristy.png" {} } //make an img element
-			content {
-				header #name ^a { $$Kristy$$ } //id=name
-				meta { date ^span { $$Joined in 2013$$ } }
-				description { $$Kristy is an art director living in New York$$ }
+			.image { img src="/images/avatar2/large/kristy.png" {} } //make an img element
+			.content {
+				.header #name a { "Kristy" } //id=name
+				.meta { .date span { "Joined in 2013" } }
+				.description { "Kristy is an art director living in New York" }
 			}
-			extra content [color: blue] { //add an inline style
-				^a {
-					user icon ^i {}
-					$$22 Friends$$
+			.extra .content [color: blue] { //add an inline style
+				a {
+					.user .icon i {}
+					"22 Friends"
 				}
 			}
 		}
@@ -85,7 +86,7 @@ All you do is include it with `<script>`. CDN and packaging and stuff forthcomin
 It has two APIs:  The first, which is automatic, processes everything inside `divified` elements.
 The second API is simply the `divify(x)` function, which can be used like `var html_str=divify(divifysource_str);`
 
-There's also an `undivlify(elemlist)` call which can be used in the console to convert from an existing `Element` instance to divify syntax in order to simplify migrations.
+There's also an `undivify(elemlist)` call which can be used in the console to convert from an existing `Element` instance to divify syntax in order to simplify migrations.
 
 ## Frameworks
 You can also use it with string interpolation and javascript multiline template strings to implement
@@ -95,10 +96,10 @@ a really simple sort of UI component system or templates. (very rudimentary)
 	function resource(namelower,namefancy)
 	{
 		return divify(`
-			item {
-				ui avatar image ^img src="./img/${namelower}.png"
-				content {
-					header { $$ ${namefancy} $$ } 
+			.item {
+				.ui .avatar .image img src="./img/${namelower}.png"
+				.content {
+					.header { "${namefancy}" } 
 					#${namelower}_content {}
 				}
 			}
