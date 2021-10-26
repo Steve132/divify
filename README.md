@@ -1,6 +1,6 @@
 # divify
 
-Divify is a simple library to create a nicer syntax to build trees of elements in HTML
+Divify is a simple library to create a nicer syntax to build trees of elements in HTML.  It's sort of similar to (pug)[https://pugjs.org/language/plain-text.html] but even better.
 
 For example, go from
 
