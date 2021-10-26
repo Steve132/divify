@@ -89,8 +89,8 @@ function _parse(tokens, index, level) {
 			ci += 1;
 		}
 		else if (tokens[ci + 1] == '=') {
-			k = tokens[ci]
-			v = tokens[ci + 2]
+			k = tokens[ci];
+			v = tokens[ci + 2].slice(1);
 			ci += 3;
 			curnode.attr[k] = v;
 		}
@@ -141,6 +141,7 @@ function _parse(tokens, index, level) {
 function divify(oldHtml) {
 	var tk = _tokenize(oldHtml);
 	var rs = _parse(tk, 0, 0);
+	console.log(rs[0]);
 	return rs[0];
 }
 
