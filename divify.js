@@ -26,7 +26,7 @@ function _tokenize(htmlIn) {
 			}
 			var z = all.slice(0, dex + 1);
 			curtoken = '"' + z;
-			ci += curtoken.length + 1;
+			ci += curtoken.length;
 			pushfunc();
 		}
 		else if (ch == '[') {
